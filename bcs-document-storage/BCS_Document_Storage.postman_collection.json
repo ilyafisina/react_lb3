@@ -1,0 +1,478 @@
+{
+	"info": {
+		"_postman_id": "bcs-document-storage-collection",
+		"name": "BCS - Хранилище документов (13.1)",
+		"description": "Коллекция запросов для тестирования REST API функционала \"Хранилище документов\" БКС Онлайн.\n\nServer: http://test.b-s-c.ru/api/rest\nBasic Auth: qa / 1q2w3e4r5t6y\n\nПеред выполнением запросов необходимо:\n1. Выполнить запрос Login для авторизации\n2. Cookies JSESSIONID и _bcspks будут автоматически сохранены",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "Server",
+			"value": "http://test.b-s-c.ru/api/rest",
+			"type": "string"
+		},
+		{
+			"key": "login",
+			"value": "ВАШ_ЛОГИН",
+			"type": "string"
+		},
+		{
+			"key": "password",
+			"value": "ВАШ_ПАРОЛЬ",
+			"type": "string"
+		},
+		{
+			"key": "documentCode",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "documentId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "imageId",
+			"value": "",
+			"type": "string"
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "username",
+				"value": "qa",
+				"type": "string"
+			},
+			{
+				"key": "password",
+				"value": "1q2w3e4r5t6y",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "0. Авторизация (Login)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test('Cookies JSESSIONID и _bcspks получены', function () {",
+							"    pm.expect(pm.cookies.has('JSESSIONID')).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"login\": \"{{login}}\",\n    \"password\": \"{{password}}\",\n    \"channel\": \"IBS\",\n    \"type\": \"up\"\n}"
+				},
+				"url": {
+					"raw": "{{Server}}/login",
+					"host": ["{{Server}}"],
+					"path": ["login"]
+				},
+				"description": "Авторизация пользователя в БКС Онлайн через API.\nВ ответе в Cookies появятся JSESSIONID и _bcspks.\n\nВНИМАНИЕ: Замените {{login}} и {{password}} на ваши реальные данные в переменных коллекции."
+			},
+			"response": []
+		},
+		{
+			"name": "1. Получить список персональных документов",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test('Response has result field', function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('result');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{}"
+				},
+				"url": {
+					"raw": "{{Server}}/document/getPersonalDocument",
+					"host": ["{{Server}}"],
+					"path": ["document", "getPersonalDocument"]
+				},
+				"description": "Шаг 1 чек-листа: Получить список имеющихся персональных документов пользователя.\n\nМетод: POST /document/getPersonalDocument\nТело запроса: пустой объект {}\n\nВ ответе возвращается список категорий и документов пользователя."
+			},
+			"response": []
+		},
+		{
+			"name": "2.1 Запросить список доступных типов документов",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test('Response has result with document types', function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('result');",
+							"    if (jsonData.result && jsonData.result.length > 0) {",
+							"        pm.expect(jsonData.result[0]).to.have.property('documentTypes');",
+							"    }",
+							"});",
+							"",
+							"// Сохраняем documentCode первого доступного типа (не ОМС) для последующих запросов",
+							"var jsonData = pm.response.json();",
+							"if (jsonData.result) {",
+							"    for (var i = 0; i < jsonData.result.length; i++) {",
+							"        var category = jsonData.result[i];",
+							"        if (category.documentTypes) {",
+							"            for (var j = 0; j < category.documentTypes.length; j++) {",
+							"                var docType = category.documentTypes[j];",
+							"                if (docType.documentCode !== 'OMS') {",
+							"                    pm.collectionVariables.set('documentCode', docType.documentCode);",
+							"                    console.log('Сохранен documentCode: ' + docType.documentCode);",
+							"                    break;",
+							"                }",
+							"            }",
+							"        }",
+							"        if (pm.collectionVariables.get('documentCode')) break;",
+							"    }",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{}"
+				},
+				"url": {
+					"raw": "{{Server}}/document/getPersonalDocumentTypes",
+					"host": ["{{Server}}"],
+					"path": ["document", "getPersonalDocumentTypes"]
+				},
+				"description": "Шаг 2.1 чек-листа: Запросить список доступных типов документов.\n\nМетод: POST /document/getPersonalDocumentTypes\nТело запроса: пустой объект {}\n\nВ ответе возвращается категоризированный список типов документов.\nАвтоматически сохраняется documentCode первого доступного типа (не ОМС) в переменную коллекции."
+			},
+			"response": []
+		},
+		{
+			"name": "2.2 Запросить параметры выбранного типа документа",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test('Response has result with parameters', function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('result');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"documentCode\": \"{{documentCode}}\"\n}"
+				},
+				"url": {
+					"raw": "{{Server}}/document/getPersonalDocumentParameter",
+					"host": ["{{Server}}"],
+					"path": ["document", "getPersonalDocumentParameter"]
+				},
+				"description": "Шаг 2.2 чек-листа: Запросить параметры выбранного для загрузки типа документа.\n\nМетод: POST /document/getPersonalDocumentParameter\nТело запроса: {\"documentCode\": \"<код типа документа>\"}\n\nВ ответе возвращается список параметров выбранного типа документа с их типами, обязательностью и порядком."
+			},
+			"response": []
+		},
+		{
+			"name": "2.3 Загрузить изображение для нового документа",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test('Response has result with image ID', function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('result');",
+							"    if (jsonData.result) {",
+							"        pm.collectionVariables.set('imageId', jsonData.result);",
+							"        console.log('Сохранен imageId: ' + jsonData.result);",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "",
+							"description": "Выберите файл изображения в формате JPEG. Нажмите Select Files и выберите .jpg файл."
+						}
+					]
+				},
+				"url": {
+					"raw": "{{Server}}/document/uploadPersonalDocumentImage",
+					"host": ["{{Server}}"],
+					"path": ["document", "uploadPersonalDocumentImage"]
+				},
+				"description": "Шаг 2.3 чек-листа: Загрузить изображение для нового документа (в jpeg).\n\nМетод: POST /document/uploadPersonalDocumentImage\nContent-Type: multipart/form-data\nПараметр file: файл изображения в формате JPEG\n\nВНИМАНИЕ: Необходимо выбрать файл изображения в поле file (Select Files).\n\nВ ответе возвращается идентификатор загруженного изображения (result).\nID изображения автоматически сохраняется в переменную imageId."
+			},
+			"response": []
+		},
+		{
+			"name": "2.4 Сохранить новый персональный документ",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test('Response result is OK', function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('result');",
+							"    pm.expect(jsonData.result).to.eql('OK');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"documentCode\": \"{{documentCode}}\",\n    \"parameters\": [\n        {\n            \"id\": 1,\n            \"type\": \"STRING\",\n            \"value\": \"Мой документ\"\n        },\n        {\n            \"id\": 2,\n            \"type\": \"STRING\",\n            \"value\": \"88 00 654321\"\n        },\n        {\n            \"id\": 3,\n            \"type\": \"STRING\",\n            \"value\": \"УФМС России\"\n        },\n        {\n            \"id\": 4,\n            \"type\": \"DATE\",\n            \"value\": \"2020-05-15\"\n        },\n        {\n            \"id\": 5,\n            \"type\": \"STRING\",\n            \"value\": \"770-001\"\n        },\n        {\n            \"id\": 6,\n            \"type\": \"STRING\",\n            \"value\": \"Иванов Иван Иванович\"\n        },\n        {\n            \"id\": 7,\n            \"type\": \"GENDER\",\n            \"value\": \"Мужской\"\n        },\n        {\n            \"id\": 8,\n            \"type\": \"DATE\",\n            \"value\": \"1995-03-10\"\n        },\n        {\n            \"id\": 9,\n            \"type\": \"STRING\",\n            \"value\": \"г. Москва\"\n        },\n        {\n            \"id\": 10,\n            \"type\": \"STRING\",\n            \"value\": \"г. Москва, ул. Примерная, д. 1\"\n        },\n        {\n            \"id\": 11,\n            \"type\": \"STRING\",\n            \"value\": \"Тестовый комментарий\"\n        },\n        {\n            \"id\": 12,\n            \"type\": \"IMAGE\",\n            \"value\": [\n                {\n                    \"id\": \"{{imageId}}\"\n                }\n            ]\n        }\n    ]\n}"
+				},
+				"url": {
+					"raw": "{{Server}}/document/savePersonalDocument",
+					"host": ["{{Server}}"],
+					"path": ["document", "savePersonalDocument"]
+				},
+				"description": "Шаг 2.4 чек-листа: Сохранить новый персональный документ с заполненными параметрами.\n\nМетод: POST /document/savePersonalDocument\nТело: JSON с documentCode и массивом parameters.\n\nПараметры заполнены для типа документа PASPORTRF (Паспорт РФ).\nЕсли вы выбрали другой тип документа, скорректируйте параметры в соответствии с ответом шага 2.2.\n\nВ поле id=12 (IMAGE) автоматически подставляется imageId из шага 2.3."
+			},
+			"response": []
+		},
+		{
+			"name": "3. Снова получить список персональных документов",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test('Response has result field', function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('result');",
+							"});",
+							"",
+							"// Сохраняем id последнего документа для последующего редактирования",
+							"var jsonData = pm.response.json();",
+							"if (jsonData.result) {",
+							"    for (var i = 0; i < jsonData.result.length; i++) {",
+							"        var category = jsonData.result[i];",
+							"        if (category.documents && category.documents.length > 0) {",
+							"            var lastDoc = category.documents[category.documents.length - 1];",
+							"            pm.collectionVariables.set('documentId', lastDoc.id.toString());",
+							"            console.log('Сохранен documentId: ' + lastDoc.id);",
+							"        }",
+							"    }",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{}"
+				},
+				"url": {
+					"raw": "{{Server}}/document/getPersonalDocument",
+					"host": ["{{Server}}"],
+					"path": ["document", "getPersonalDocument"]
+				},
+				"description": "Шаг 3 чек-листа: Снова получить список персональных документов.\n\nМетод: POST /document/getPersonalDocument\nТело запроса: пустой объект {}\n\nТеперь в ответе должен появиться новый документ, загруженный на шаге 2.\nID последнего документа автоматически сохраняется в переменную documentId."
+			},
+			"response": []
+		},
+		{
+			"name": "4. Изменить параметр загруженного документа",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test('Response result is OK', function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('result');",
+							"    pm.expect(jsonData.result).to.eql('OK');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"{{documentId}}\",\n    \"parameters\": [\n        {\n            \"id\": 1,\n            \"type\": \"STRING\",\n            \"value\": \"Мой документ (обновлено)\"\n        },\n        {\n            \"id\": 2,\n            \"type\": \"STRING\",\n            \"value\": \"88 00 654321\"\n        },\n        {\n            \"id\": 3,\n            \"type\": \"STRING\",\n            \"value\": \"УФМС России\"\n        },\n        {\n            \"id\": 4,\n            \"type\": \"DATE\",\n            \"value\": \"2020-05-15\"\n        },\n        {\n            \"id\": 5,\n            \"type\": \"STRING\",\n            \"value\": \"770-001\"\n        },\n        {\n            \"id\": 6,\n            \"type\": \"STRING\",\n            \"value\": \"Иванов Иван Иванович\"\n        },\n        {\n            \"id\": 7,\n            \"type\": \"GENDER\",\n            \"value\": \"Мужской\"\n        },\n        {\n            \"id\": 8,\n            \"type\": \"DATE\",\n            \"value\": \"1995-03-10\"\n        },\n        {\n            \"id\": 9,\n            \"type\": \"STRING\",\n            \"value\": \"г. Москва\"\n        },\n        {\n            \"id\": 10,\n            \"type\": \"STRING\",\n            \"value\": \"г. Москва, ул. Примерная, д. 1\"\n        },\n        {\n            \"id\": 11,\n            \"type\": \"STRING\",\n            \"value\": \"Обновленный комментарий после редактирования\"\n        },\n        {\n            \"id\": 12,\n            \"type\": \"IMAGE\",\n            \"value\": [\n                {\n                    \"id\": \"{{imageId}}\"\n                }\n            ]\n        }\n    ]\n}"
+				},
+				"url": {
+					"raw": "{{Server}}/document/savePersonalDocument",
+					"host": ["{{Server}}"],
+					"path": ["document", "savePersonalDocument"]
+				},
+				"description": "Шаг 4 чек-листа: Изменить любой параметр загруженного документа.\n\nИзменяемый параметр: id=1 (Название) — значение изменено с \"Мой документ\" на \"Мой документ (обновлено)\".\nТакже изменен параметр id=11 (Комментарий) — значение изменено на \"Обновленный комментарий после редактирования\".\n\nМетод: POST /document/savePersonalDocument\nТело: JSON с id документа и обновленными parameters.\n\nОбратите внимание: при редактировании вместо documentCode передается id существующего документа."
+			},
+			"response": []
+		},
+		{
+			"name": "5. Получить параметры документа (проверить изменение)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Status code is 200', function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test('Response has result with parameters', function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('result');",
+							"});",
+							"",
+							"pm.test('Параметр Название обновлен', function () {",
+							"    var jsonData = pm.response.json();",
+							"    if (jsonData.result) {",
+							"        var nameParam = jsonData.result.find(function(p) { return p.id === 1; });",
+							"        if (nameParam) {",
+							"            pm.expect(nameParam.value).to.include('обновлено');",
+							"        }",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": \"{{documentId}}\"\n}"
+				},
+				"url": {
+					"raw": "{{Server}}/document/getPersonalDocumentParameter",
+					"host": ["{{Server}}"],
+					"path": ["document", "getPersonalDocumentParameter"]
+				},
+				"description": "Шаг 5 чек-листа: Получить список параметров персональных документов, где отобразить изменение параметра.\n\nМетод: POST /document/getPersonalDocumentParameter\nТело: {\"id\": \"<id документа>\"}\n\nВ ответе должны отобразиться обновленные значения параметров:\n- id=1 (Название): \"Мой документ (обновлено)\"\n- id=11 (Комментарий): \"Обновленный комментарий после редактирования\""
+			},
+			"response": []
+		}
+	]
+}
