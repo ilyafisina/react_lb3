@@ -69,10 +69,10 @@ function CheckoutPage() {
 
   if (orderComplete) {
     return (
-      <div className="page">
+      <section className="page" aria-labelledby="checkout-success-heading">
         <div className="checkout">
-          <div className="checkout__success">
-            <h3>Заказ успешно оформлен!</h3>
+          <div className="checkout__success" role="alert" aria-live="polite">
+            <h1 id="checkout-success-heading">Заказ успешно оформлен!</h1>
             <p>Спасибо за покупку. Ваш заказ обрабатывается.</p>
             <button
               className="btn btn--primary"
@@ -83,178 +83,220 @@ function CheckoutPage() {
             </button>
           </div>
         </div>
-      </div>
+      </section>
     );
   }
 
   return (
-    <div className="page">
-      <h1 className="page__title">Оформление заказа</h1>
+    <section className="page" aria-labelledby="checkout-heading">
+      <h1 className="page__title" id="checkout-heading">Оформление заказа</h1>
       <div className="checkout">
-        <div className="checkout__steps">
-          {STEPS.map((step, index) => (
-            <div
-              key={step}
-              className={`checkout__step ${
-                index === currentStep ? 'checkout__step--active' : ''
-              } ${index < currentStep ? 'checkout__step--completed' : ''}`}
-            >
-              <div className="checkout__step-number">{index + 1}</div>
-              <div className="checkout__step-label">{step}</div>
-            </div>
-          ))}
-        </div>
+        <nav className="checkout__steps" aria-label="Этапы оформления заказа">
+          <ol className="checkout__steps-list">
+            {STEPS.map((step, index) => (
+              <li
+                key={step}
+                className={`checkout__step ${
+                  index === currentStep ? 'checkout__step--active' : ''
+                } ${index < currentStep ? 'checkout__step--completed' : ''}`}
+                aria-current={index === currentStep ? 'step' : undefined}
+              >
+                <div className="checkout__step-number" aria-hidden="true">{index + 1}</div>
+                <div className="checkout__step-label">
+                  <span className="visually-hidden">
+                    {index < currentStep ? 'Завершено: ' : index === currentStep ? 'Текущий этап: ' : 'Следующий: '}
+                  </span>
+                  {step}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </nav>
 
-        <div className="checkout__form">
+        <form className="checkout__form" onSubmit={(e) => e.preventDefault()} aria-label={`Этап ${currentStep + 1}: ${STEPS[currentStep]}`}>
           {currentStep === 0 && (
-            <>
-              <h3>Данные доставки</h3>
+            <fieldset>
+              <legend><h2>Данные доставки</h2></legend>
               <div className="form-group">
-                <label>Адрес</label>
+                <label htmlFor="shipping-address">Адрес</label>
                 <input
+                  id="shipping-address"
                   type="text"
                   value={shipping.address}
                   onChange={(e) =>
                     setShipping({ ...shipping, address: e.target.value })
                   }
                   placeholder="ул. Примерная, д. 1, кв. 10"
+                  required
+                  aria-required="true"
+                  autoComplete="street-address"
                 />
               </div>
               <div className="form-group">
-                <label>Город</label>
+                <label htmlFor="shipping-city">Город</label>
                 <input
+                  id="shipping-city"
                   type="text"
                   value={shipping.city}
                   onChange={(e) =>
                     setShipping({ ...shipping, city: e.target.value })
                   }
                   placeholder="Москва"
+                  required
+                  aria-required="true"
+                  autoComplete="address-level2"
                 />
               </div>
               <div className="form-group">
-                <label>Почтовый индекс</label>
+                <label htmlFor="shipping-zip">Почтовый индекс</label>
                 <input
+                  id="shipping-zip"
                   type="text"
                   value={shipping.zip}
                   onChange={(e) =>
                     setShipping({ ...shipping, zip: e.target.value })
                   }
                   placeholder="101000"
+                  required
+                  aria-required="true"
+                  autoComplete="postal-code"
                 />
               </div>
               <div className="form-group">
-                <label>Телефон</label>
+                <label htmlFor="shipping-phone">Телефон</label>
                 <input
-                  type="text"
+                  id="shipping-phone"
+                  type="tel"
                   value={shipping.phone}
                   onChange={(e) =>
                     setShipping({ ...shipping, phone: e.target.value })
                   }
                   placeholder="+7 (999) 123-45-67"
+                  required
+                  aria-required="true"
+                  autoComplete="tel"
                 />
               </div>
-            </>
+            </fieldset>
           )}
 
           {currentStep === 1 && (
-            <>
-              <h3>Данные оплаты</h3>
+            <fieldset>
+              <legend><h2>Данные оплаты</h2></legend>
               <div className="form-group">
-                <label>Номер карты</label>
+                <label htmlFor="payment-card">Номер карты</label>
                 <input
+                  id="payment-card"
                   type="text"
                   value={payment.cardNumber}
                   onChange={(e) =>
                     setPayment({ ...payment, cardNumber: e.target.value })
                   }
                   placeholder="0000 0000 0000 0000"
+                  required
+                  aria-required="true"
+                  autoComplete="cc-number"
+                  inputMode="numeric"
                 />
               </div>
               <div className="form-group">
-                <label>Имя владельца</label>
+                <label htmlFor="payment-holder">Имя владельца</label>
                 <input
+                  id="payment-holder"
                   type="text"
                   value={payment.cardHolder}
                   onChange={(e) =>
                     setPayment({ ...payment, cardHolder: e.target.value })
                   }
                   placeholder="IVAN IVANOV"
+                  required
+                  aria-required="true"
+                  autoComplete="cc-name"
                 />
               </div>
               <div className="form-group">
-                <label>Срок действия</label>
+                <label htmlFor="payment-expiry">Срок действия</label>
                 <input
+                  id="payment-expiry"
                   type="text"
                   value={payment.expiry}
                   onChange={(e) =>
                     setPayment({ ...payment, expiry: e.target.value })
                   }
                   placeholder="MM/YY"
+                  required
+                  aria-required="true"
+                  autoComplete="cc-exp"
                 />
               </div>
               <div className="form-group">
-                <label>CVV</label>
+                <label htmlFor="payment-cvv">CVV</label>
                 <input
+                  id="payment-cvv"
                   type="text"
                   value={payment.cvv}
                   onChange={(e) =>
                     setPayment({ ...payment, cvv: e.target.value })
                   }
                   placeholder="123"
+                  required
+                  aria-required="true"
+                  autoComplete="cc-csc"
+                  inputMode="numeric"
                 />
               </div>
-            </>
+            </fieldset>
           )}
 
           {currentStep === 2 && (
-            <>
-              <h3>Подтверждение заказа</h3>
-              <div style={{ marginBottom: '16px' }}>
-                <strong>Адрес доставки:</strong> {shipping.address},{' '}
-                {shipping.city}, {shipping.zip}
-              </div>
-              <div style={{ marginBottom: '16px' }}>
-                <strong>Телефон:</strong> {shipping.phone}
-              </div>
-              <div style={{ marginBottom: '16px' }}>
-                <strong>Способ оплаты:</strong> Карта **** {payment.cardNumber.slice(-4)}
-              </div>
+            <div aria-labelledby="confirm-heading">
+              <h2 id="confirm-heading">Подтверждение заказа</h2>
+              <dl className="checkout__summary-list">
+                <dt><strong>Адрес доставки:</strong></dt>
+                <dd>{shipping.address}, {shipping.city}, {shipping.zip}</dd>
+                <dt><strong>Телефон:</strong></dt>
+                <dd>{shipping.phone}</dd>
+                <dt><strong>Способ оплаты:</strong></dt>
+                <dd>Карта **** {payment.cardNumber.slice(-4)}</dd>
+              </dl>
               <div style={{ marginBottom: '16px' }}>
                 <strong>Товары:</strong>
-                {items.map((item) => (
-                  <div key={item.product.id} style={{ padding: '4px 0' }}>
-                    {item.product.name} x {item.quantity} —{' '}
-                    {(item.product.price * item.quantity).toLocaleString('ru-RU')} ₽
-                  </div>
-                ))}
+                <ul className="checkout__items-list">
+                  {items.map((item) => (
+                    <li key={item.product.id}>
+                      {item.product.name} × {item.quantity} —{' '}
+                      {(item.product.price * item.quantity).toLocaleString('ru-RU')} ₽
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <div style={{ fontSize: '1.2rem', fontWeight: 700 }}>
+              <div style={{ fontSize: '1.2rem', fontWeight: 700 }} aria-label={`Итого: ${total.toLocaleString('ru-RU')} рублей`}>
                 Итого: {total.toLocaleString('ru-RU')} ₽
               </div>
-            </>
+            </div>
           )}
 
           <div className="checkout__actions">
             {currentStep > 0 ? (
-              <button className="btn btn--outline" onClick={handleBack}>
+              <button className="btn btn--outline" onClick={handleBack} type="button">
                 Назад
               </button>
             ) : (
               <div />
             )}
             {currentStep < STEPS.length - 1 ? (
-              <button className="btn btn--primary" onClick={handleNext}>
+              <button className="btn btn--primary" onClick={handleNext} type="button">
                 Далее
               </button>
             ) : (
-              <button className="btn btn--success" onClick={handleSubmit}>
+              <button className="btn btn--success" onClick={handleSubmit} type="button">
                 Подтвердить заказ
               </button>
             )}
           </div>
-        </div>
+        </form>
       </div>
-    </div>
+    </section>
   );
 }
 

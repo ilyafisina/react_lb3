@@ -13,40 +13,42 @@ function ProductCard({ product }) {
   };
 
   return (
-    <div className="product-card">
+    <article className="product-card" aria-label={`Товар: ${product.name}`}>
       <div className="product-card__image-wrapper">
         <img
           className="product-card__image"
           src={product.image}
-          alt={product.name}
+          alt={`Изображение товара: ${product.name}`}
         />
         {user && (
           <button
             className={`product-card__fav ${isFavorite ? 'product-card__fav--active' : ''}`}
             onClick={handleToggleFavorite}
-            title={isFavorite ? 'Убрать из избранного' : 'В избранное'}
+            aria-label={isFavorite ? `Убрать ${product.name} из избранного` : `Добавить ${product.name} в избранное`}
+            aria-pressed={isFavorite}
           >
             {isFavorite ? '\u2665' : '\u2661'}
           </button>
         )}
       </div>
       <div className="product-card__body">
-        <div className="product-card__category">{product.category}</div>
-        <div className="product-card__name">{product.name}</div>
-        <div className="product-card__description">{product.description}</div>
+        <p className="product-card__category">{product.category}</p>
+        <h2 className="product-card__name">{product.name}</h2>
+        <p className="product-card__description">{product.description}</p>
         <div className="product-card__footer">
-          <span className="product-card__price">
+          <span className="product-card__price" aria-label={`Цена: ${product.price.toLocaleString('ru-RU')} рублей`}>
             {product.price.toLocaleString('ru-RU')} ₽
           </span>
           <button
             className="btn btn--primary"
             onClick={() => dispatch(addToCart(product))}
+            aria-label={`Добавить ${product.name} в корзину`}
           >
             В корзину
           </button>
         </div>
       </div>
-    </div>
+    </article>
   );
 }
 

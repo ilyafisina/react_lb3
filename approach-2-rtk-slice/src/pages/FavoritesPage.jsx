@@ -26,23 +26,31 @@ function FavoritesPage() {
     favorites.some((fav) => fav.productId === product.id)
   );
 
-  if (loading) return <div className="loading">Загрузка избранного...</div>;
+  if (loading) {
+    return (
+      <div className="loading" role="status" aria-live="polite">
+        <span>Загрузка избранного...</span>
+      </div>
+    );
+  }
 
   return (
-    <div className="page">
-      <h1 className="page__title">Избранное</h1>
+    <section className="page" aria-labelledby="favorites-heading">
+      <h1 className="page__title" id="favorites-heading">Избранное</h1>
       {favoriteProducts.length === 0 ? (
-        <div className="cart-empty">
+        <div className="cart-empty" role="status">
           <p>В избранном пока ничего нет</p>
         </div>
       ) : (
-        <div className="products-grid">
+        <div className="products-grid" role="list" aria-label="Избранные товары">
           {favoriteProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <div role="listitem" key={product.id}>
+              <ProductCard product={product} />
+            </div>
           ))}
         </div>
       )}
-    </div>
+    </section>
   );
 }
 

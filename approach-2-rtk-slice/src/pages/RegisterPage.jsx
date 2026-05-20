@@ -23,39 +23,53 @@ function RegisterPage() {
   };
 
   return (
-    <div className="page">
+    <section className="page" aria-labelledby="register-heading">
       <div className="auth-page">
-        <form className="auth-form" onSubmit={handleSubmit}>
-          <h2>Регистрация</h2>
-          {error && <div className="auth-form__error">{error}</div>}
+        <form className="auth-form" onSubmit={handleSubmit} aria-labelledby="register-heading" noValidate>
+          <h2 id="register-heading">Регистрация</h2>
+          {error && (
+            <div className="auth-form__error" role="alert" aria-live="assertive" id="register-error">
+              {error}
+            </div>
+          )}
           <div className="form-group">
-            <label>Имя</label>
+            <label htmlFor="register-name">Имя</label>
             <input
+              id="register-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Иван Иванов"
               required
+              aria-required="true"
+              autoComplete="name"
             />
           </div>
           <div className="form-group">
-            <label>Email</label>
+            <label htmlFor="register-email">Email</label>
             <input
+              id="register-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="user@example.com"
               required
+              aria-required="true"
+              aria-describedby={error ? 'register-error' : undefined}
+              autoComplete="email"
             />
           </div>
           <div className="form-group">
-            <label>Пароль</label>
+            <label htmlFor="register-password">Пароль</label>
             <input
+              id="register-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Придумайте пароль"
               required
+              aria-required="true"
+              autoComplete="new-password"
             />
           </div>
           <button
@@ -63,6 +77,7 @@ function RegisterPage() {
             style={{ width: '100%' }}
             type="submit"
             disabled={loading}
+            aria-busy={loading}
           >
             {loading ? 'Регистрация...' : 'Зарегистрироваться'}
           </button>
@@ -71,7 +86,7 @@ function RegisterPage() {
           </div>
         </form>
       </div>
-    </div>
+    </section>
   );
 }
 

@@ -16,49 +16,65 @@ function OrdersPage() {
     }
   }, [dispatch, user]);
 
-  if (loading) return <div className="loading">Загрузка заказов...</div>;
-  if (error) return <div className="error">Ошибка: {error}</div>;
+  if (loading) {
+    return (
+      <div className="loading" role="status" aria-live="polite">
+        <span>Загрузка заказов...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error" role="alert" aria-live="assertive">
+        Ошибка: {error}
+      </div>
+    );
+  }
 
   return (
-    <div className="page">
-      <h1 className="page__title">Мои заказы</h1>
+    <section className="page" aria-labelledby="orders-heading">
+      <h1 className="page__title" id="orders-heading">Мои заказы</h1>
       {items.length === 0 ? (
-        <div className="orders-empty">У вас пока нет заказов</div>
+        <div className="orders-empty" role="status">У вас пока нет заказов</div>
       ) : (
-        items.map((order) => (
-          <div key={order.id} className="order-card">
-            <div className="order-card__header">
-              <div>
-                <span className="order-card__id">Заказ #{order.id}</span>
-                <span className="order-card__date" style={{ marginLeft: '12px' }}>
-                  {new Date(order.createdAt).toLocaleDateString('ru-RU')}
-                </span>
-              </div>
-              <span
-                className={`order-card__status order-card__status--${order.status}`}
-              >
-                {order.status === 'paid' ? 'Оплачен' : 'В обработке'}
-              </span>
-            </div>
-            <div className="order-card__items">
-              {order.items.map((item, index) => (
-                <div key={index} className="order-card__item">
-                  <span>
-                    {item.name} x {item.quantity}
-                  </span>
-                  <span>
-                    {(item.price * item.quantity).toLocaleString('ru-RU')} ₽
+        <div role="list" aria-label="Список заказов">
+          {items.map((order) => (
+            <article key={order.id} className="order-card" role="listitem" aria-label={`Заказ номер ${order.id}`}>
+              <div className="order-card__header">
+                <div>
+                  <span className="order-card__id">Заказ #{order.id}</span>
+                  <span className="order-card__date" style={{ marginLeft: '12px' }}>
+                    {new Date(order.createdAt).toLocaleDateString('ru-RU')}
                   </span>
                 </div>
-              ))}
-            </div>
-            <div className="order-card__total">
-              Итого: {order.total.toLocaleString('ru-RU')} ₽
-            </div>
-          </div>
-        ))
+                <span
+                  className={`order-card__status order-card__status--${order.status}`}
+                  role="status"
+                >
+                  {order.status === 'paid' ? 'Оплачен' : 'В обработке'}
+                </span>
+              </div>
+              <ul className="order-card__items" aria-label="Товары в заказе">
+                {order.items.map((item, index) => (
+                  <li key={index} className="order-card__item">
+                    <span>
+                      {item.name} × {item.quantity}
+                    </span>
+                    <span>
+                      {(item.price * item.quantity).toLocaleString('ru-RU')} ₽
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <div className="order-card__total" aria-label={`Итого: ${order.total.toLocaleString('ru-RU')} рублей`}>
+                Итого: {order.total.toLocaleString('ru-RU')} ₽
+              </div>
+            </article>
+          ))}
+        </div>
       )}
-    </div>
+    </section>
   );
 }
 
