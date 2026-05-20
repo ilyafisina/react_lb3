@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Лабораторная №8 — Блокчейн-шифрование файлов (Вариант 2)</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Блокчейн-шифрование файлов</h1>
+    <p class="subtitle">Лабораторная работа №8 · Вариант 2 · AES-256 · SHA-256 + сжатие</p>
+  </header>
+
+  <main>
+    <!-- Панель управления файлами -->
+    <section class="panel" id="file-panel">
+      <h2>📁 Работа с файлом</h2>
+
+      <div class="controls-row">
+        <div class="control-group">
+          <label for="file-input">Выбрать файл:</label>
+          <input type="file" id="file-input">
+        </div>
+        <div class="control-group">
+          <label>Или создать текстовый файл:</label>
+          <textarea id="text-input" rows="4" placeholder="Введите произвольный текст..."></textarea>
+          <input type="text" id="text-filename" placeholder="Имя файла (например, test.txt)" value="test.txt">
+          <button id="btn-create-file" class="btn btn-secondary">Создать файл</button>
+        </div>
+      </div>
+
+      <div id="file-info" class="info-box hidden">
+        <h3>Информация о файле</h3>
+        <p><strong>Имя:</strong> <span id="fi-name"></span></p>
+        <p><strong>Размер:</strong> <span id="fi-size"></span> байт</p>
+        <p><strong>Тип:</strong> <span id="fi-type"></span></p>
+        <div id="fi-preview-wrap">
+          <p><strong>Предпросмотр:</strong></p>
+          <pre id="fi-preview"></pre>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button id="btn-hash" class="btn" disabled>Вычислить хэш (SHA-256 + сжатие)</button>
+        <button id="btn-encrypt" class="btn btn-accent" disabled>Зашифровать (AES-256)</button>
+        <button id="btn-add-block" class="btn btn-primary" disabled>Добавить в блокчейн</button>
+      </div>
+
+      <div id="hash-result" class="info-box hidden">
+        <h3>Хэш файла</h3>
+        <p class="mono" id="hash-value"></p>
+        <p class="mono small" id="hash-compressed-value"></p>
+      </div>
+
+      <div id="encrypt-result" class="info-box hidden">
+        <h3>Результат шифрования</h3>
+        <p><strong>Статус:</strong> <span id="enc-status"></span></p>
+        <p><strong>Ключ сессии (зашифрован мастер-ключом):</strong></p>
+        <p class="mono small" id="enc-key"></p>
+      </div>
+    </section>
+
+    <!-- Мастер-ключ -->
+    <section class="panel" id="master-key-panel">
+      <h2>🔑 Мастер-ключ</h2>
+      <div class="controls-row">
+        <div class="control-group">
+          <label for="master-key">Мастер-ключ пользователя:</label>
+          <input type="password" id="master-key" placeholder="Введите мастер-ключ..." value="">
+          <small>Используется для защиты сессионных ключей шифрования</small>
+        </div>
+      </div>
+    </section>
+
+    <!-- Расшифровка -->
+    <section class="panel" id="decrypt-panel">
+      <h2>🔓 Расшифровка файла</h2>
+      <div class="controls-row">
+        <div class="control-group">
+          <label for="decrypt-file-input">Выбрать зашифрованный файл:</label>
+          <input type="file" id="decrypt-file-input">
+        </div>
+        <div class="control-group">
+          <label for="decrypt-master-key">Мастер-ключ:</label>
+          <input type="password" id="decrypt-master-key" placeholder="Введите мастер-ключ для расшифровки...">
+        </div>
+      </div>
+      <button id="btn-decrypt" class="btn btn-accent" disabled>Расшифровать</button>
+      <div id="decrypt-result" class="info-box hidden">
+        <h3>Результат расшифровки</h3>
+        <p id="decrypt-status"></p>
+        <pre id="decrypt-preview"></pre>
+      </div>
+    </section>
+
+    <!-- Верификация -->
+    <section class="panel" id="verify-panel">
+      <h2>✅ Верификация файла</h2>
+      <div class="controls-row">
+        <div class="control-group">
+          <label for="verify-file-input">Выбрать файл для проверки:</label>
+          <input type="file" id="verify-file-input">
+        </div>
+      </div>
+      <button id="btn-verify" class="btn btn-primary" disabled>Проверить целостность</button>
+      <div id="verify-result" class="info-box hidden">
+        <h3>Результат верификации</h3>
+        <div id="verify-status"></div>
+      </div>
+    </section>
+
+    <!-- Блокчейн -->
+    <section class="panel" id="blockchain-panel">
+      <h2>⛓ Цепочка блокчейна</h2>
+      <div class="btn-row">
+        <button id="btn-validate" class="btn">Проверить целостность цепочки</button>
+        <button id="btn-tamper" class="btn btn-danger">Изменить блок (тест)</button>
+        <button id="btn-export" class="btn btn-secondary">Экспорт JSON</button>
+        <button id="btn-reset" class="btn btn-danger">Сбросить цепочку</button>
+      </div>
+      <div id="chain-status" class="info-box hidden"></div>
+      <div id="blockchain-view"></div>
+    </section>
+
+    <!-- Лог операций -->
+    <section class="panel" id="log-panel">
+      <h2>📋 Лог операций</h2>
+      <div id="log-entries"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Лабораторная работа №8 · Использование блокчейна при шифровании файлов · Вариант 2</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Смартфон Galaxy S24",
+      "description": "Флагманский смартфон с AMOLED-дисплеем 6.2\", 8/256 ГБ",
+      "price": 79990,
+      "image": "https://via.placeholder.com/300x200?text=Galaxy+S24",
+      "category": "Электроника"
+    },
+    {
+      "id": 2,
+      "name": "Ноутбук ThinkPad X1",
+      "description": "Бизнес-ноутбук 14\", Intel i7, 16 ГБ RAM, 512 ГБ SSD",
+      "price": 124990,
+      "image": "https://via.placeholder.com/300x200?text=ThinkPad+X1",
+      "category": "Электроника"
+    },
+    {
+      "id": 3,
+      "name": "Наушники Sony WH-1000XM5",
+      "description": "Беспроводные наушники с шумоподавлением",
+      "price": 29990,
+      "image": "https://via.placeholder.com/300x200?text=Sony+WH1000XM5",
+      "category": "Аксессуары"
+    },
+    {
+      "id": 4,
+      "name": "Клавиатура Keychron K2",
+      "description": "Механическая беспроводная клавиатура, Gateron Brown",
+      "price": 8990,
+      "image": "https://via.placeholder.com/300x200?text=Keychron+K2",
+      "category": "Аксессуары"
+    },
+    {
+      "id": 5,
+      "name": "Монитор Dell U2723QE",
+      "description": "27\" 4K IPS USB-C монитор для работы",
+      "price": 54990,
+      "image": "https://via.placeholder.com/300x200?text=Dell+U2723QE",
+      "category": "Электроника"
+    },
+    {
+      "id": 6,
+      "name": "Мышь Logitech MX Master 3S",
+      "description": "Эргономичная беспроводная мышь для продуктивности",
+      "price": 7990,
+      "image": "https://via.placeholder.com/300x200?text=MX+Master+3S",
+      "category": "Аксессуары"
+    },
+    {
+      "id": 7,
+      "name": "Планшет iPad Air",
+      "description": "10.9\" Liquid Retina, M1, 256 ГБ",
+      "price": 64990,
+      "image": "https://via.placeholder.com/300x200?text=iPad+Air",
+      "category": "Электроника"
+    },
+    {
+      "id": 8,
+      "name": "Рюкзак Xiaomi Business",
+      "description": "Городской рюкзак для ноутбука до 15.6\", водоотталкивающий",
+      "price": 2990,
+      "image": "https://via.placeholder.com/300x200?text=Xiaomi+Backpack",
+      "category": "Аксессуары"
+    }
+  ],
+  "users": [
+    {
+      "id": 1,
+      "email": "user@example.com",
+      "password": "password123",
+      "name": "Иван Иванов"
+    }
+  ],
+  "orders": [],
+  "favorites": []
+}
