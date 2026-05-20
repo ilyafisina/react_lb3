@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { logout } from '../store/authSlice';
+import { logout } from '../store/entities/auth';
+import { selectCartCount } from '../store/entities/cart';
 
 function Header() {
   const dispatch = useDispatch();
-  const { user } = useSelector((state) => state.auth);
-  const { items } = useSelector((state) => state.cart);
-  const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const user = useSelector((state) => state.auth.user);
+  const cartCount = useSelector(selectCartCount);
+  const favoritesCount = useSelector((state) => state.favorites.items.length);
 
   return (
     <header className="header">
@@ -24,6 +25,12 @@ function Header() {
           </Link>
           {user ? (
             <div className="header__user">
+              <Link to="/favorites">
+                Избранное
+                {favoritesCount > 0 && (
+                  <span className="header__fav-badge">{favoritesCount}</span>
+                )}
+              </Link>
               <Link to="/orders">Заказы</Link>
               <span className="header__user-name">{user.name}</span>
               <button

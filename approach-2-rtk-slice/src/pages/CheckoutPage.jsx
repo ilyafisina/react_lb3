@@ -1,16 +1,18 @@
 import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { createOrder } from '../store/ordersSlice';
-import { clearCart } from '../store/cartSlice';
+import { createRequest } from '../store/entities/orders';
+import { clearCart, selectItems, selectCartTotal } from '../store/entities/cart';
+import { selectUser } from '../store/entities/auth';
 
 const STEPS = ['Доставка', 'Оплата', 'Подтверждение'];
 
 function CheckoutPage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { items } = useSelector((state) => state.cart);
-  const { user } = useSelector((state) => state.auth);
+  const items = useSelector(selectItems);
+  const total = useSelector(selectCartTotal);
+  const user = useSelector(selectUser);
   const [currentStep, setCurrentStep] = useState(0);
   const [orderComplete, setOrderComplete] = useState(false);
 
@@ -28,11 +30,6 @@ function CheckoutPage() {
     cvv: '',
   });
 
-  const total = items.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
-    0
-  );
-
   const handleNext = () => {
     if (currentStep < STEPS.length - 1) {
       setCurrentStep(currentStep + 1);
@@ -45,7 +42,7 @@ function CheckoutPage() {
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     const orderData = {
       userId: user.id,
       items: items.map((item) => ({
@@ -60,13 +57,9 @@ function CheckoutPage() {
       createdAt: new Date().toISOString(),
     };
 
-    try {
-      await dispatch(createOrder(orderData)).unwrap();
-      dispatch(clearCart());
-      setOrderComplete(true);
-    } catch {
-      // handled by slice
-    }
+    dispatch(createRequest(orderData));
+    dispatch(clearCart());
+    setOrderComplete(true);
   };
 
   if (items.length === 0 && !orderComplete) {

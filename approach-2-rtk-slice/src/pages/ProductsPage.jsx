@@ -1,14 +1,17 @@
 import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchProducts } from '../store/productsSlice';
+import { fetchRequest } from '../store/entities/products';
+import { selectItems, selectLoading, selectError } from '../store/entities/products';
 import ProductCard from '../components/ProductCard';
 
 function ProductsPage() {
   const dispatch = useDispatch();
-  const { items, loading, error } = useSelector((state) => state.products);
+  const items = useSelector(selectItems);
+  const loading = useSelector(selectLoading);
+  const error = useSelector(selectError);
 
   useEffect(() => {
-    dispatch(fetchProducts());
+    dispatch(fetchRequest());
   }, [dispatch]);
 
   if (loading) return <div className="loading">Загрузка товаров...</div>;
