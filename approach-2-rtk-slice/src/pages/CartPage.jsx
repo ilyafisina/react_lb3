@@ -1,16 +1,14 @@
 import { useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
+import { selectItems, selectCartTotal } from '../store/entities/cart';
+import { selectUser } from '../store/entities/auth';
 import CartItem from '../components/CartItem';
 
 function CartPage() {
-  const { items } = useSelector((state) => state.cart);
-  const { user } = useSelector((state) => state.auth);
+  const items = useSelector(selectItems);
+  const total = useSelector(selectCartTotal);
+  const user = useSelector(selectUser);
   const navigate = useNavigate();
-
-  const total = items.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
-    0
-  );
 
   if (items.length === 0) {
     return (

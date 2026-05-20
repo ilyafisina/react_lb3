@@ -1,19 +1,32 @@
+import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectUser } from './store/entities/auth';
+import { fetchRequest as fetchFavorites } from './store/entities/favorites';
 import Header from './components/Header';
 import ProductsPage from './pages/ProductsPage';
 import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrdersPage from './pages/OrdersPage';
+import FavoritesPage from './pages/FavoritesPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 
 function PrivateRoute({ children }) {
-  const { user } = useSelector((state) => state.auth);
+  const user = useSelector(selectUser);
   return user ? children : <Navigate to="/login" />;
 }
 
 function App() {
+  const dispatch = useDispatch();
+  const user = useSelector(selectUser);
+
+  useEffect(() => {
+    if (user) {
+      dispatch(fetchFavorites(user.id));
+    }
+  }, [dispatch, user]);
+
   return (
     <>
       <Header />
@@ -35,6 +48,14 @@ function App() {
             element={
               <PrivateRoute>
                 <OrdersPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/favorites"
+            element={
+              <PrivateRoute>
+                <FavoritesPage />
               </PrivateRoute>
             }
           />

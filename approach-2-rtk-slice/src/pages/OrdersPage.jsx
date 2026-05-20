@@ -1,15 +1,18 @@
 import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchOrders } from '../store/ordersSlice';
+import { fetchRequest, selectItems, selectLoading, selectError } from '../store/entities/orders';
+import { selectUser } from '../store/entities/auth';
 
 function OrdersPage() {
   const dispatch = useDispatch();
-  const { items, loading, error } = useSelector((state) => state.orders);
-  const { user } = useSelector((state) => state.auth);
+  const items = useSelector(selectItems);
+  const loading = useSelector(selectLoading);
+  const error = useSelector(selectError);
+  const user = useSelector(selectUser);
 
   useEffect(() => {
     if (user) {
-      dispatch(fetchOrders(user.id));
+      dispatch(fetchRequest(user.id));
     }
   }, [dispatch, user]);
 
