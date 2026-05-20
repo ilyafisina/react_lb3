@@ -22,29 +22,40 @@ function LoginPage() {
   };
 
   return (
-    <div className="page">
+    <section className="page" aria-labelledby="login-heading">
       <div className="auth-page">
-        <form className="auth-form" onSubmit={handleSubmit}>
-          <h2>Вход</h2>
-          {error && <div className="auth-form__error">{error}</div>}
+        <form className="auth-form" onSubmit={handleSubmit} aria-labelledby="login-heading" noValidate>
+          <h2 id="login-heading">Вход</h2>
+          {error && (
+            <div className="auth-form__error" role="alert" aria-live="assertive" id="login-error">
+              {error}
+            </div>
+          )}
           <div className="form-group">
-            <label>Email</label>
+            <label htmlFor="login-email">Email</label>
             <input
+              id="login-email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="user@example.com"
               required
+              aria-required="true"
+              aria-describedby={error ? 'login-error' : undefined}
+              autoComplete="email"
             />
           </div>
           <div className="form-group">
-            <label>Пароль</label>
+            <label htmlFor="login-password">Пароль</label>
             <input
+              id="login-password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Введите пароль"
               required
+              aria-required="true"
+              autoComplete="current-password"
             />
           </div>
           <button
@@ -52,6 +63,7 @@ function LoginPage() {
             style={{ width: '100%' }}
             type="submit"
             disabled={loading}
+            aria-busy={loading}
           >
             {loading ? 'Вход...' : 'Войти'}
           </button>
@@ -60,7 +72,7 @@ function LoginPage() {
           </div>
         </form>
       </div>
-    </div>
+    </section>
   );
 }
 

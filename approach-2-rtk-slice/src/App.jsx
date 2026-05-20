@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectUser } from './store/entities/auth';
 import { fetchRequest as fetchFavorites } from './store/entities/favorites';
@@ -12,6 +12,16 @@ import FavoritesPage from './pages/FavoritesPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 
+const PAGE_TITLES = {
+  '/products': 'Каталог товаров — ShopApp',
+  '/cart': 'Корзина — ShopApp',
+  '/checkout': 'Оформление заказа — ShopApp',
+  '/orders': 'Мои заказы — ShopApp',
+  '/favorites': 'Избранное — ShopApp',
+  '/login': 'Вход — ShopApp',
+  '/register': 'Регистрация — ShopApp',
+};
+
 function PrivateRoute({ children }) {
   const user = useSelector(selectUser);
   return user ? children : <Navigate to="/login" />;
@@ -20,6 +30,7 @@ function PrivateRoute({ children }) {
 function App() {
   const dispatch = useDispatch();
   const user = useSelector(selectUser);
+  const location = useLocation();
 
   useEffect(() => {
     if (user) {
@@ -27,10 +38,18 @@ function App() {
     }
   }, [dispatch, user]);
 
+  useEffect(() => {
+    const title = PAGE_TITLES[location.pathname] || 'ShopApp — Интернет-магазин';
+    document.title = title;
+  }, [location.pathname]);
+
   return (
     <>
+      <a href="#main-content" className="skip-link">
+        Перейти к основному содержимому
+      </a>
       <Header />
-      <div className="container">
+      <main id="main-content" className="container" role="main" aria-label="Основное содержимое">
         <Routes>
           <Route path="/" element={<Navigate to="/products" />} />
           <Route path="/products" element={<ProductsPage />} />
@@ -62,7 +81,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
         </Routes>
-      </div>
+      </main>
     </>
   );
 }

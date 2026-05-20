@@ -12,15 +12,15 @@ function CartPage() {
 
   if (items.length === 0) {
     return (
-      <div className="page">
-        <h1 className="page__title">Корзина</h1>
-        <div className="cart-empty">
+      <section className="page" aria-labelledby="cart-heading">
+        <h1 className="page__title" id="cart-heading">Корзина</h1>
+        <div className="cart-empty" role="status">
           <p>Корзина пуста</p>
           <Link to="/products" className="btn btn--primary" style={{ marginTop: '16px', display: 'inline-block' }}>
             Перейти к товарам
           </Link>
         </div>
-      </div>
+      </section>
     );
   }
 
@@ -33,20 +33,24 @@ function CartPage() {
   };
 
   return (
-    <div className="page">
-      <h1 className="page__title">Корзина</h1>
-      {items.map((item) => (
-        <CartItem key={item.product.id} item={item} />
-      ))}
-      <div className="cart-summary">
-        <span className="cart-summary__total">
+    <section className="page" aria-labelledby="cart-heading">
+      <h1 className="page__title" id="cart-heading">Корзина</h1>
+      <div role="list" aria-label="Товары в корзине">
+        {items.map((item) => (
+          <div role="listitem" key={item.product.id}>
+            <CartItem item={item} />
+          </div>
+        ))}
+      </div>
+      <div className="cart-summary" aria-live="polite">
+        <span className="cart-summary__total" aria-label={`Итого: ${total.toLocaleString('ru-RU')} рублей`}>
           Итого: {total.toLocaleString('ru-RU')} ₽
         </span>
         <button className="btn btn--success" onClick={handleCheckout}>
           Оформить заказ
         </button>
       </div>
-    </div>
+    </section>
   );
 }
 

@@ -14,35 +14,43 @@ function CartItem({ item }) {
   };
 
   return (
-    <div className="cart-item">
-      <img className="cart-item__image" src={product.image} alt={product.name} />
+    <article className="cart-item" aria-label={`${product.name}, количество: ${quantity}`}>
+      <img className="cart-item__image" src={product.image} alt={`Изображение: ${product.name}`} />
       <div className="cart-item__info">
-        <div className="cart-item__name">{product.name}</div>
-        <div className="cart-item__price">
+        <h3 className="cart-item__name">{product.name}</h3>
+        <p className="cart-item__price">
           {product.price.toLocaleString('ru-RU')} ₽
-        </div>
+        </p>
       </div>
-      <div className="cart-item__controls">
-        <button className="cart-item__qty-btn" onClick={handleDecrease}>
-          -
+      <div className="cart-item__controls" role="group" aria-label={`Управление количеством: ${product.name}`}>
+        <button
+          className="cart-item__qty-btn"
+          onClick={handleDecrease}
+          aria-label={`Уменьшить количество ${product.name}`}
+        >
+          −
         </button>
-        <span className="cart-item__qty">{quantity}</span>
+        <span className="cart-item__qty" aria-live="polite" aria-atomic="true">
+          {quantity}
+        </span>
         <button
           className="cart-item__qty-btn"
           onClick={() =>
             dispatch(updateQuantity({ productId: product.id, quantity: quantity + 1 }))
           }
+          aria-label={`Увеличить количество ${product.name}`}
         >
           +
         </button>
         <button
           className="btn btn--danger"
           onClick={() => dispatch(removeFromCart(product.id))}
+          aria-label={`Удалить ${product.name} из корзины`}
         >
           Удалить
         </button>
       </div>
-    </div>
+    </article>
   );
 }
 

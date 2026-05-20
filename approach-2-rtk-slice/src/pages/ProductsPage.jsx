@@ -14,18 +14,33 @@ function ProductsPage() {
     dispatch(fetchRequest());
   }, [dispatch]);
 
-  if (loading) return <div className="loading">Загрузка товаров...</div>;
-  if (error) return <div className="error">Ошибка: {error}</div>;
+  if (loading) {
+    return (
+      <div className="loading" role="status" aria-live="polite">
+        <span>Загрузка товаров...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error" role="alert" aria-live="assertive">
+        Ошибка: {error}
+      </div>
+    );
+  }
 
   return (
-    <div className="page">
-      <h1 className="page__title">Каталог товаров</h1>
-      <div className="products-grid">
+    <section className="page" aria-labelledby="products-heading">
+      <h1 className="page__title" id="products-heading">Каталог товаров</h1>
+      <div className="products-grid" role="list" aria-label="Список товаров">
         {items.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <div role="listitem" key={product.id}>
+            <ProductCard product={product} />
+          </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }
 
